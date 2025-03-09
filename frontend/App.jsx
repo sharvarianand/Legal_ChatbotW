@@ -1,10 +1,11 @@
 import React from "react";
-import ChatBox from "./components/ChatBox";
+import ChatComponent from "./components/ChatComponent";
+import "./styles/global.css";
 
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <ChatBox />
+    <div className="App">
+      <ChatComponent />
     </div>
   );
 }
