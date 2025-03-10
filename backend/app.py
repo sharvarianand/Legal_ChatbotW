@@ -2,13 +2,17 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from together import Together
 import os
-from dotenv import load_dotenv  # Add this import
+from dotenv import load_dotenv
+from routes.chatbot import chatbot_bp  # Import the Blueprint
 
 # Load environment variables from .env file
-load_dotenv()  # Add this line
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Register the chatbot Blueprint
+app.register_blueprint(chatbot_bp, url_prefix="/api")
 
 # Set your Together API key
 API_KEY = os.getenv("TOGETHER_API_KEY")
@@ -17,12 +21,14 @@ if not API_KEY:
 
 client = Together(api_key=API_KEY)
 
+# You need to implement the generate_response function in services/ai_integration.py
+# Here's what it might look like:
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'GET':
         return "Welcome to the Legal Chatbot API! Make a POST request to interact."
     elif request.method == 'POST':
-        # Redirect POST requests to the chat function
         return handle_chat_request()
 
 @app.route('/chat', methods=['POST'])
@@ -44,10 +50,12 @@ def handle_chat_request():
         )
 
         formatted_response = "\n".join([f"• {line.strip()}" for line in response.choices[0].message.content.split('\n') if line.strip()])
+        
+        # This would be a good place to save to the database
+        
         return jsonify({"response": formatted_response})
     except Exception as e:
-        return jsonify({"error": "An error occurred while processing the request: " + str(e)}), 500
-
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
