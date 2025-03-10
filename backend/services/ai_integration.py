@@ -16,4 +16,4 @@ def generate_response(prompt):
         )
         return response["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: An error occurred while generating the response: {str(e)}"
