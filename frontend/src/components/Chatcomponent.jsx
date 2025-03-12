@@ -3,9 +3,10 @@ import Input from "../design/input.jsx";
 import Button from "../design/button.jsx";
 import Card from "../design/card.jsx";
 import CardContent from "../design/cardContent.jsx";
-import { FiLoader, FiMoon, FiSun, FiSend, FiInfo, FiUser, FiTrash2 } from "react-icons/fi";
+import { FiLoader, FiMoon, FiSun, FiSend, FiInfo, FiUser, FiTrash2, FiDownload, FiSearch, FiPlus } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils.js";
+import { detectLanguage, translateText } from "../services/translationService"; // Import translation services
 
 const ChatComponent = () => {
   const [messages, setMessages] = useState([]);
@@ -13,6 +14,10 @@ const ChatComponent = () => {
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [language, setLanguage] = useState("en"); // State for language
   
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -55,6 +60,11 @@ const ChatComponent = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
     
+    // Detect language and translate input if necessary
+    const detectedLanguage = await detectLanguage(input);
+    setLanguage(detectedLanguage);
+    const translatedInput = detectedLanguage !== "en" ? await translateText(input, "en") : input;
+    
     // Add the user message immediately for better UX
     const userMessage = { 
       text: input, 
@@ -80,7 +90,7 @@ const ChatComponent = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          prompt: input,
+          prompt: translatedInput,
           conversation_history: messages.slice(-10) // Send recent conversation for context
         }),
       });
@@ -92,11 +102,12 @@ const ChatComponent = () => {
       }
   
       const data = await response.json();
+      const translatedResponse = language !== "en" ? await translateText(data.response, language) : data.response;
       
       // Remove typing indicator if it exists and add the actual response
       setMessages(prev => 
         prev.filter(msg => !msg.isTyping).concat({ 
-          text: data.response, 
+          text: translatedResponse, 
           sender: "bot",
           timestamp: new Date().toISOString(),
           animated: true
@@ -125,6 +136,35 @@ const ChatComponent = () => {
     if (!timestamp) return "";
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const exportChat = () => {
+    const chatContent = messages.map(msg => `${msg.sender === "user" ? "You" : "Bot"}: ${msg.text}`).join("\n");
+    const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chat_history.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleHistory = async () => {
+    setShowHistory(!showHistory);
+    if (!showHistory) {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/history");
+        const data = await response.json();
+        setChatHistory(data.history);
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    }
+  };
+
+  const startNewChat = () => {
+    setMessages([]);
+    setInput("");
   };
 
   return (
@@ -162,6 +202,20 @@ const ChatComponent = () => {
             </Button>
             <Button 
               variant="ghost" 
+              onClick={exportChat}
+              className="rounded-full h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-blue-500"
+            >
+              <FiDownload className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={toggleHistory}
+              className="rounded-full h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-green-500"
+            >
+              <FiSearch className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
               onClick={() => setDarkMode(!darkMode)}
               className="rounded-full h-9 w-9 p-0 flex items-center justify-center"
             >
@@ -190,6 +244,8 @@ const ChatComponent = () => {
           )}
         </AnimatePresence>
         
+
+        
         {/* Chat Container */}
         <Card 
           ref={chatContainerRef}
@@ -202,19 +258,16 @@ const ChatComponent = () => {
         >
           <CardContent>
             {messages.length === 0 ? (
+
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <div className="animate-pulse mb-4">
-                    <div className="h-12 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center">
-                      <FiUser className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  <p className="text-gray-500 dark:text-gray-400">Loading your legal assistant...</p>
+                  <p className="text-gray-500 dark:text-gray-400">No messages found.</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 {messages.map((msg, index) => (
+
                   <AnimatePresence mode="wait" key={index}>
                     <motion.div
                       initial={msg.animated ? { opacity: 0, y: 10 } : false}
@@ -297,6 +350,41 @@ const ChatComponent = () => {
           </div>
         </div>
       </div>
+      
+      {/* Side Panel for Chat History */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div 
+            initial={{ opacity: 0, x: -100 }} 
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg p-4 overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Chat History</h2>
+              <Button 
+                variant="ghost" 
+                onClick={startNewChat}
+                className="rounded-full h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-green-500"
+              >
+                <FiPlus className="w-5 h-5" />
+              </Button>
+            </div>
+            <ul>
+              {chatHistory.map((chat, index) => (
+                <li key={index} className="mb-2">
+                  <button 
+                    className="w-full text-left p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                    onClick={() => setMessages(chat.messages)}
+                  >
+                    {chat.prompt}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,0 +1,100 @@
+/* ...existing code... */
+
+body {
+    color: black; /* Ensure text is visible in light mode */
+    background-color: white; /* Light background for light mode */
+    /* ...existing code... */
+}
+
+body.dark-mode {
+    color: white; /* Ensure text is visible in dark mode */
+    background-color: #121212; /* Dark background for dark mode */
+    /* ...existing code... */
+}
+
+body input[type="search"] {
+    color: black; /* Ensure search bar text is visible in light mode */
+    background-color: white; /* Light background for search bar in light mode */
+    caret-color: black; /* Change cursor color for light mode */
+}
+
+body.dark-mode input[type="search"] {
+    color: white; /* Ensure search bar text is visible in dark mode */
+    background-color: #333; /* Dark background for search bar in dark mode */
+    caret-color: white; /* Change cursor color for dark mode */
+}
+
+button {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+#chat-history {
+    display: none; /* Initially hidden */
+    background-color: #f1f1f1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+#language-selector {
+    margin: 10px 0;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white; /* White background for light mode */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .login-container {
+    background-color: #f9f9f9; /* Light background for dark mode */
+}
+
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-container label {
+    display: block;
+    margin-top: 10px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background-color: #0056b3;
+}
+
+/* ...existing code... */

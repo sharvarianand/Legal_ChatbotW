@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang="login">Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Language selector -->
+    <select id="language-selector" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="mr">मराठी (Marathi)</option>
+        <option value="gu">ગુજરાતી (Gujarati)</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+    </select>
+    
+    <div class="login-container">
+        <h2 data-lang="login">Login</h2>
+        <form id="login-form">
+            <label for="username" data-lang="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password" data-lang="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit" data-lang="loginButton">Login</button>
+        </form>
+        <div id="login-error" style="color: red; display: none;" data-lang="invalidCredentials">Invalid username or password</div>
+    </div>
+    
+    <script src="script.js" defer></script>
+    <script src="login.js" defer></script>
+</body>
+</html>

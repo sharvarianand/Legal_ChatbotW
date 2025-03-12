@@ -30,6 +30,10 @@ init_db()
 
 @chatbot_bp.route("/chat", methods=["POST"])
 def chat():
+    # Debug log for incoming data
+    data = request.get_json()
+    print(f"Incoming data: {data}")  # Debug log for incoming data
+
     """
     Handle chat requests from the frontend.
     
@@ -50,7 +54,6 @@ def chat():
     try:
         data = request.get_json()
         
-        # Validate request data
         if not data:
             return jsonify({"error": "No data provided"}), 400
             
@@ -60,10 +63,8 @@ def chat():
         if not prompt:
             return jsonify({"error": "Prompt cannot be empty"}), 400
             
-        # Generate response using AI service
         bot_reply = generate_response(prompt, conversation_history)
         
-        # Return the response
         return jsonify({"response": bot_reply})
         
     except Exception as e:
