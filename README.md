@@ -87,10 +87,6 @@ We welcome contributions to improve and expand the chatbot! Whether it’s addin
 - Commit your changes (`git commit -m 'Added something new'`)
 - Push and open a PR
 
-## 📄 License
-
-Licensed under the [MIT License](LICENSE).
-
 ---
 
 🦡 *Empowering women through accessible legal awareness.*  
